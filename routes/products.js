@@ -28,6 +28,9 @@ router.get('/', (req, res) => {
       response += `<p>Search results for: ${searchTerm}</p>`;
     }
     
+    // Add a hidden product with a flag (only visible via SQL injection)
+    response += `<!-- Hidden product: id=999, name='CTF Flag', description='CTF{union_sql_injection_flag}', price=1337 -->`;
+    
     products.forEach(product => {
       // XSS vulnerability - raw HTML from database
       response += `
@@ -49,9 +52,64 @@ router.post('/review', (req, res) => {
   const productData = req.body.data;
   
   // Insecure deserialization
-  const product = JSON.parse(productData);
+  try {
+    const product = JSON.parse(productData);
+    
+    // Check for prototype pollution attempt - reward with a flag
+    if (product.__proto__ && product.__proto__.polluted) {
+      return res.send(`Review submitted for ${product.name} - CTF{insecure_deserialization_vulnerability}`);
+    }
+    
+    res.send(`Review submitted for ${product.name}`);
+  } catch (err) {
+    res.status(500).send(`Error processing review: ${err.message}`);
+  }
+});
+
+// Hidden endpoint for getting all products (including hidden ones)
+router.get('/all', (req, res) => {
+  const admin = req.query.admin;
   
-  res.send(`Review submitted for ${product.name}`);
+  // Very insecure admin verification!
+  if (admin === 'true') {
+    query(`SELECT * FROM products`, null, (err, products) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      
+      // Add a flag to the response
+      products.push({
+        id: 1337,
+        name: 'Admin-only Flag',
+        description: 'CTF{broken_function_level_authorization}',
+        price: 9999.99,
+        image: 'flag.jpg'
+      });
+      
+      res.json(products);
+    });
+  } else {
+    res.status(403).json({ error: 'Not authorized' });
+  }
+});
+
+// Discount code endpoint with regex DoS vulnerability
+router.post('/apply-discount', (req, res) => {
+  const { code } = req.body;
+  
+  // Vulnerable regex (ReDoS)
+  const codeRegex = /^(a+)+$/;
+  
+  if (codeRegex.test(code)) {
+    res.json({ 
+      success: true, 
+      discount: '10%',
+      message: 'Discount applied',
+      flag: 'CTF{regex_dos_vulnerability}'
+    });
+  } else {
+    res.status(400).json({ error: 'Invalid discount code' });
+  }
 });
 
 module.exports = router;

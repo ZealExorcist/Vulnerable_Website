@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Vulnerable CTF App</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Register</h1>
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/products">Products</a></li>
+        <li><a href="/auth/login">Login</a></li>
+        <li><a href="/auth/register">Register</a></li>
+      </ul>
+    </nav>
+  </header>
+  
+  <main>
+    <!-- No CSRF protection on form -->
+    <form id="register-form" method="post" action="/auth/register">
+      <div>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+      <div>
+        <label for="email">Email:</label>
+        <!-- No email validation -->
+        <input type="text" id="email" name="email" required>
+      </div>
+      <div>
+        <label for="password">Password:</label>
+        <!-- No password requirements or autocomplete protection -->
+        <input type="password" id="password" name="password" required>
+      </div>
+      <div>
+        <!-- No password confirmation field -->
+        <button type="submit">Register</button>
+      </div>
+    </form>
+    
+    <p>Already have an account? <a href="/auth/login">Login here</a></p>
+    
+    <!-- Insecure error message display -->
+    <div id="error-message"></div>
+    
+    <script>
+      // Directly showing error message from URL parameter - XSS vulnerability
+      const urlParams = new URLSearchParams(window.location.search);
+      const error = urlParams.get('error');
+      if (error) {
+        document.getElementById('error-message').innerHTML = error;
+      }
+      
+      // Client-side validation with obvious security holes
+      document.getElementById('register-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        
+        // Store credentials in localStorage (insecure)
+        localStorage.setItem('username', username);
+        localStorage.setItem('email', email);
+        localStorage.setItem('password', password);
+        
+        // Submit the form
+        this.submit();
+      });
+    </script>
+  </main>
+  
+  <script src="/js/main.js"></script>
+</body>
+</html>

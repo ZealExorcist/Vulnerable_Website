@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Vulnerable CTF App</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Admin Panel</h1>
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/products">Products</a></li>
+        <li><a href="/admin">Admin Panel</a></li>
+        <li><a href="/auth/logout">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+  
+  <main>
+    <h2>User Management</h2>
+    
+    <section id="user-list">
+      <h3>All Users</h3>
+      <div id="users-table">Loading...</div>
+    </section>
+    
+    <section>
+      <h3>Admin Actions</h3>
+      <form id="set-admin-form">
+        <div>
+          <label for="userId">User ID:</label>
+          <input type="number" id="userId" name="userId" required>
+        </div>
+        <div>
+          <button type="submit">Make Admin</button>
+        </div>
+      </form>
+      
+      <form id="delete-user-form">
+        <div>
+          <label for="deleteUserId">User ID:</label>
+          <input type="number" id="deleteUserId" name="userId" required>
+        </div>
+        <div>
+          <button type="submit">Delete User</button>
+        </div>
+      </form>
+    </section>
+  </main>
+  
+  <script>
+    // Load users
+    function loadUsers() {
+      fetch('/api/users')
+        .then(response => response.json())
+        .then(users => {
+          const table = document.createElement('table');
+          table.innerHTML = `
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Role</th>
+            </tr>
+          `;
+          
+          users.forEach(user => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${user.id}</td>
+              <td>${user.username}</td>
+              <td>${user.email}</td>
+              <td>${user.role}</td>
+            `;
+            table.appendChild(row);
+          });
+          
+          document.getElementById('users-table').innerHTML = '';
+          document.getElementById('users-table').appendChild(table);
+        })
+        .catch(error => {
+          console.error('Error loading users:', error);
+          document.getElementById('users-table').textContent = 'Error loading users';
+        });
+    }
+    
+    // Set admin event handler
+    document.getElementById('set-admin-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const userId = document.getElementById('userId').value;
+      
+      fetch('/admin/set-admin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.message);
+        loadUsers();
+      })
+      .catch(error => {
+        console.error('Error setting admin:', error);
+        alert('Error setting admin role');
+      });
+    });
+    
+    // Delete user event handler
+    document.getElementById('delete-user-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const userId = document.getElementById('deleteUserId').value;
+      
+      fetch('/admin/delete-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.message);
+        loadUsers();
+      })
+      .catch(error => {
+        console.error('Error deleting user:', error);
+        alert('Error deleting user');
+      });
+    });
+    
+    // Load users when page loads
+    document.addEventListener('DOMContentLoaded', loadUsers);
+  </script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile - Vulnerable CTF App</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>User Profile</h1>
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/products">Products</a></li>
+        <li><a href="/auth/profile">Profile</a></li>
+        <li><a href="/auth/logout">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+  
+  <main>
+    <section id="user-info">
+      <h2>Welcome <span id="username-display">User</span>!</h2>
+      <p>Your account details:</p>
+      <div id="user-details">Loading...</div>
+    </section>
+    
+    <!-- Password change form with CSRF vulnerability -->
+    <section>
+      <h3>Change Password</h3>
+      <!-- No CSRF token protection -->
+      <form id="password-change-form" action="/auth/change-password" method="POST">
+        <div>
+          <label for="current-password">Current Password:</label>
+          <input type="password" id="current-password" name="current_password">
+        </div>
+        <div>
+          <label for="new-password">New Password:</label>
+          <input type="password" id="new-password" name="new_password">
+        </div>
+        <div>
+          <button type="submit">Change Password</button>
+        </div>
+      </form>
+    </section>
+    
+    <!-- Insecure data export with path traversal vulnerability -->
+    <section>
+      <h3>Export Your Data</h3>
+      <form id="export-form">
+        <div>
+          <label for="export-path">Export to file:</label>
+          <input type="text" id="export-path" name="path" value="my_data.txt">
+        </div>
+        <div>
+          <button type="submit">Export Data</button>
+        </div>
+      </form>
+      <div id="export-result"></div>
+    </section>
+    
+    <!-- Hidden flag for CTF challenge -->
+    <!-- CTF{profile_page_inspection} -->
+    <div style="display:none;" id="secret-flag">You found a hidden flag!</div>
+  </main>
+  
+  <script>
+    // Simple XSS vulnerability - directly inserting user data
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get user info from session storage (insecure client-side storage)
+      const username = localStorage.getItem('username') || 'User';
+      document.getElementById('username-display').textContent = username;
+      
+      // Fetch user details with potential XSS
+      fetch('/api/users?filter=' + username)
+        .then(response => response.json())
+        .then(users => {
+          if (users.length > 0) {
+            const user = users[0];
+            // Vulnerable to stored XSS - username, email could contain malicious scripts
+            document.getElementById('user-details').innerHTML = `
+              <p><strong>Username:</strong> ${user.username}</p>
+              <p><strong>Email:</strong> ${user.email}</p>
+              <p><strong>Role:</strong> ${user.role}</p>
+              <p><strong>User ID:</strong> <span id="user-id">${user.id}</span></p>
+            `;
+          } else {
+            document.getElementById('user-details').textContent = 'User details not found';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          document.getElementById('user-details').textContent = 'Error loading user details';
+        });
+    });
+    
+    // Insecure data export with potential path traversal
+    document.getElementById('export-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const path = document.getElementById('export-path').value;
+      
+      // Vulnerable to path traversal - no validation of user-supplied path
+      fetch(`/download?file=${path}`)
+        .then(response => {
+          if (response.ok) {
+            document.getElementById('export-result').innerHTML = 
+              '<p class="success">Data exported successfully!</p>';
+          } else {
+            document.getElementById('export-result').innerHTML = 
+              '<p class="error">Failed to export data.</p>';
+          }
+        })
+        .catch(error => {
+          document.getElementById('export-result').innerHTML = 
+            `<p class="error">Error: ${error.message}</p>`;
+        });
+    });
+  </script>
+</body>
+</html>
