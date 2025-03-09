@@ -1,0 +1,20 @@
+{
+  "name": "vulnerable-ctf-app",
+  "version": "1.0.0",
+  "description": "A deliberately vulnerable app for CTF challenges",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "bcrypt": "1.0.3",
+    "body-parser": "1.18.2",
+    "express": "4.16.1",
+    "express-session": "1.15.6",
+    "lodash": "4.17.11",
+    "node-fetch": "2.6.0",
+    "serialize-javascript": "1.9.0",
+    "sqlite3": "4.0.4",
+    "vulnerable-ctf-app": "file:"
+  }
+}

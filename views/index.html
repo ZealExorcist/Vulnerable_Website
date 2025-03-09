@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vulnerable CTF App</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Welcome to Vulnerable E-commerce</h1>
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/products">Products</a></li>
+        <li><a href="/auth/login">Login</a></li>
+        <li><a href="/auth/register">Register</a></li>
+        <!-- Hidden admin link, easily discoverable -->
+        <li style="display:none;"><a href="/admin">Admin Panel</a></li>
+      </ul>
+    </nav>
+  </header>
+  
+  <main>
+    <section>
+      <h2>Latest Products</h2>
+      <!-- XSS vulnerability in search -->
+      <form action="/products" method="get">
+        <input type="text" name="search" placeholder="Search products...">
+        <button type="submit">Search</button>
+      </form>
+      
+      <!-- Insecure message display -->
+      <div id="message-box"></div>
+    </section>
+  </main>
+  
+  <footer>
+    <p>&copy; 2023 Vulnerable E-commerce</p>
+    <!-- Comment with sensitive information -->
+    <!-- Note: Default admin credentials are admin/admin123 -->
+  </footer>
+  
+  <script src="/js/main.js"></script>
+</body>
+</html>

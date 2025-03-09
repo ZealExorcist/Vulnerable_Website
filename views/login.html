@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Vulnerable CTF App</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Login</h1>
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/products">Products</a></li>
+        <li><a href="/auth/login">Login</a></li>
+        <li><a href="/auth/register">Register</a></li>
+      </ul>
+    </nav>
+  </header>
+  
+  <main>
+    <!-- No CSRF protection on form -->
+    <form id="login-form" method="post" action="/auth/login">
+      <div>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+      <div>
+        <label for="password">Password:</label>
+        <!-- No autocomplete protection -->
+        <input type="password" id="password" name="password" required>
+      </div>
+      <div>
+        <button type="submit">Login</button>
+      </div>
+    </form>
+    
+    <p>Forgot password? <a href="/auth/reset">Reset it here</a></p>
+    
+    <!-- Insecure error message display -->
+    <div id="error-message"></div>
+    
+    <script>
+      // Directly showing error message from URL parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const error = urlParams.get('error');
+      if (error) {
+        document.getElementById('error-message').innerHTML = error;
+      }
+    </script>
+  </main>
+  
+  <script src="/js/main.js"></script>
+</body>
+</html>
