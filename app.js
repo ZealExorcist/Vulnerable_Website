@@ -52,11 +52,6 @@ async function startApp() {
       cookie: { secure: false, httpOnly: false } // Insecure cookies
     }));
 
-    // Debug middleware to check session status
-    app.use((req, res, next) => {
-      console.log('Session:', req.session);
-      next();
-    });
 
     // Load routes
     const authRoutes = require('./routes/auth');
