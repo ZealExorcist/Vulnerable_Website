@@ -101,7 +101,7 @@
       const path = document.getElementById('export-path').value;
       
       // Vulnerable to path traversal - no validation of user-supplied path
-      fetch(`/download?file=${path}`)
+      fetch(`/download?file=${path.replace(/\.jpg$/i, '.png')}`)
         .then(response => {
           if (response.ok) {
             document.getElementById('export-result').innerHTML = 

@@ -4,6 +4,7 @@ const session = require('express-session');
 const path = require('path');
 const fs = require('fs');
 const fetch = require('node-fetch');
+const helmet = require('helmet');
 const { initDatabase } = require('./config/database');
 const app = express();
 const port = 3000;
@@ -13,6 +14,13 @@ async function startApp() {
   try {
     // Wait for database to initialize
     await initDatabase();
+
+    // Create images directory if it doesn't exist
+    const imagesDir = path.join(__dirname, 'public', 'images');
+    if (!fs.existsSync(imagesDir)) {
+      fs.mkdirSync(imagesDir, { recursive: true });
+      console.log('Created images directory');
+    }
 
     // A5: Security Misconfiguration - Revealing stack traces to users
     app.use((err, req, res, next) => {
@@ -25,6 +33,9 @@ async function startApp() {
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
     app.use(express.static('public'));
+
+    // Add security headers
+    app.use(helmet());
 
     // Custom header with flag
     app.use((req, res, next) => {
@@ -40,6 +51,12 @@ async function startApp() {
       saveUninitialized: true,
       cookie: { secure: false, httpOnly: false } // Insecure cookies
     }));
+
+    // Debug middleware to check session status
+    app.use((req, res, next) => {
+      console.log('Session:', req.session);
+      next();
+    });
 
     // Load routes
     const authRoutes = require('./routes/auth');
@@ -67,7 +84,12 @@ async function startApp() {
         return res.send(`Path traversal detected! Flag: CTF{path_traversal_vulnerability}`);
       }
       
-      res.download(file); 
+      const filePath = path.join(__dirname, file);
+      if (fs.existsSync(filePath)) {
+        res.download(filePath);
+      } else {
+        res.status(404).send('File not found');
+      }
     });
 
     // A10: Server-Side Request Forgery (SSRF)

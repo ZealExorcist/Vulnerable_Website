@@ -96,4 +96,7 @@ router.get('/backup', (req, res) => {
   res.send(`<h1>Backup requested: ${backupFile}</h1><p>Try to use path traversal to get files outside the backup directory.</p>`);
 });
 
+// Removed the dangling code that was causing the ReferenceError:
+// products.push({...});
+
 module.exports = router;

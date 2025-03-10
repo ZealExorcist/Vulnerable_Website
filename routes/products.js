@@ -83,7 +83,7 @@ router.get('/all', (req, res) => {
         name: 'Admin-only Flag',
         description: 'CTF{broken_function_level_authorization}',
         price: 9999.99,
-        image: 'flag.jpg'
+        image: 'flag.png'  // Fixed path: removed 'public/images/'
       });
       
       res.json(products);

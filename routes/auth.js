@@ -19,6 +19,7 @@ router.get('/register', (req, res) => {
 // A7: Identification and Authentication Failures
 router.post('/login', (req, res) => {
   const { username, password } = req.body;
+  console.log('Login attempt:', username, password);
   
   // A3: Injection - SQL injection vulnerability
   query(`SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`, 
@@ -33,9 +34,9 @@ router.post('/login', (req, res) => {
         req.session.user = rows[0];
         // Add a flag in session
         req.session.secretFlag = 'CTF{session_hijacking_vulnerability}';
-        res.redirect('/profile');
+        res.redirect('/auth/profile');
       } else {
-        res.redirect('/login?error=Invalid credentials');
+        res.redirect('/auth/login?error=Invalid credentials');
       }
     }
   );
@@ -51,6 +52,7 @@ router.get('/reset', (req, res) => {
 // A7: Identification and Authentication Failures - Weak registration
 router.post('/register', (req, res) => {
   const { username, password, email } = req.body;
+  console.log('Register attempt:', username, password, email);
   
   // No password complexity requirements or validation
   query(`INSERT INTO users (username, password, email) VALUES ('${username}', '${password}', '${email}')`,
@@ -59,7 +61,7 @@ router.post('/register', (req, res) => {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
-      res.redirect('/login');
+      res.redirect('/auth/login');
     }
   );
 });
@@ -92,11 +94,12 @@ router.post('/change-password', (req, res) => {
 
 // A1: Broken Access Control - No proper authentication check
 router.get('/profile', (req, res) => {
+  console.log('Profile access, session:', req.session);
   // Simple check that's easily bypassed
   if (req.session.user) {
     res.sendFile(path.join(__dirname, '../views', 'profile.html'));
   } else {
-    res.redirect('/login');
+    res.redirect('/auth/login');
   }
 });
 

@@ -57,13 +57,13 @@ async function initDatabase() {
     
       // Insert some dummy products
       db.run(`INSERT OR IGNORE INTO products (name, description, price, image)
-              VALUES ('Flag 1', 'This product contains a flag!', 100, 'flag1.jpg')`);
+              VALUES ('Flag 1', 'This product contains a flag!', 100, 'flag1.png')`);
               
       db.run(`INSERT OR IGNORE INTO products (name, description, price, image)
-              VALUES ('Secret Flag', 'CTF{blind_sql_injection_flag}', 1337, 'secret.jpg')`);
+              VALUES ('Secret Flag', 'CTF{blind_sql_injection_flag}', 1337, 'secret.png')`);
               
       db.run(`INSERT OR IGNORE INTO products (name, description, price, image)
-              VALUES ('Admin Product', '<script>alert("CTF{stored_xss_in_product}")</script>', 500, 'admin.jpg')`);
+              VALUES ('Admin Product', '<script>alert("CTF{stored_xss_in_product}")</script>', 500, 'admin.png')`);
 
       // Insert hidden flags
       db.run(`INSERT OR IGNORE INTO hidden_flags (flag_name, flag_value) 
